@@ -158,7 +158,10 @@ async def image_prediction(repo: str, entry_point: Optional[str] = 'main', versi
 
         additional_parameters = {}
         if parameters:
-            additional_parameters = json.loads(parameters)
+            try:
+                additional_parameters = json.loads(parameters)
+            except:
+                logging.warning('Failed parsing additional parameters')
 
         # execute the project
         run = mlflow.projects.run(
