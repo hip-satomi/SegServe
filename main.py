@@ -7,6 +7,7 @@ from utils import TempFolder
 import os.path as osp
 import mlflow
 import json
+import logging
 
 app = FastAPI()
 
