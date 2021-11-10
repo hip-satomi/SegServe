@@ -19,7 +19,6 @@ class TempFolder:
         return self
 
     def __exit__(self, type, value, traceback):
-        # TODO: Uncomment this
-        # shutil.rmtree(self.root)
+        shutil.rmtree(self.root)
         #os.chdir(self.cwd)
         pass
