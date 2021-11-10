@@ -1,3 +1,3 @@
 # Serve Segmentation Server
 
-Default accessible at port 8080
+Default accessible at port 8000
