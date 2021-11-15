@@ -188,3 +188,7 @@ async def image_prediction(repo: str, entry_point: Optional[str] = 'main', versi
         # collect the results
         with open(output_file, 'r') as output_json:
             return json.load(output_json)
+
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run("main:app",host='0.0.0.0', port=4557, reload=True, debug=True, workers=3)

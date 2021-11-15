@@ -2,7 +2,21 @@ FROM continuumio/miniconda3:4.10.3
 
 RUN mkdir app/
 
+RUN mkdir /home/appuser/
+
+RUN groupadd -g 999 appuser && \
+    useradd -r -u 999 -g appuser appuser
+
+RUN chown -R appuser:appuser app/
+RUN chown -R appuser:appuser /home/appuser/
+
+RUN chown -R appuser:appuser /opt/conda
+
 WORKDIR app/
+
+USER appuser
+
+
 
 RUN conda install mamba -c conda-forge -y
 

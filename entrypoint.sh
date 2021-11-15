@@ -14,4 +14,4 @@ conda activate serve
 set -euo pipefail
 
 # exec the final command:
-exec uvicorn main:app
+exec uvicorn --host 0.0.0.0 main:app
