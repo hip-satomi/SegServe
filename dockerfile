@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:4.10.3
+FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
 
 RUN mkdir app/
 
@@ -12,7 +12,7 @@ RUN chown -R appuser:appuser /home/appuser/
 
 RUN chown -R appuser:appuser /opt/conda
 
-WORKDIR app/
+WORKDIR /home/appuser/
 
 USER appuser
 
@@ -26,7 +26,7 @@ COPY ./sharedData ./sharedData
 COPY ./main.py ./
 COPY ./utils.py ./
 
-RUN conda create -n serve python=3.8.5
+RUN conda create -y -n serve python=3.8.5 mamba git -c conda-forge
 
 RUN conda run -n serve \
   python -m pip install -r requirements.txt
@@ -34,15 +34,18 @@ RUN conda run -n serve \
 RUN conda run -n serve python --version
 
 # Make RUN commands use the new environment:
-RUN echo "conda activate serve" >> ~/.bashrc
 SHELL ["/bin/bash", "--login", "-c"]
+RUN conda init bash
+RUN echo "conda activate serve" >> /home/appuser/.bashrc
 
 COPY ./entrypoint.sh ./
+
+ENV MLFLOW_CONDA_CREATE_ENV_CMD=mamba
 
 ENTRYPOINT ["./entrypoint.sh"]
 
 #CMD [ \
-#  "conda activate serve" \
+  #"conda activate serve" \
   #"conda", "activate", "serve", "&&" \
   #"conda", "run", "-n", "serve", \
   #"uvicorn", "main:app" \

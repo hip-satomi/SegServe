@@ -2,6 +2,9 @@
 # The --login ensures the bash configuration is loaded,
 # enabling Conda.
 
+conda init bash
+source /home/appuser/.bashrc
+
 # Enable strict mode.
 set -euo pipefail
 # ... Run whatever commands ...
@@ -14,4 +17,5 @@ conda activate serve
 set -euo pipefail
 
 # exec the final command:
-exec uvicorn --host 0.0.0.0 main:app
+exec $@
+#exec uvicorn --host 0.0.0.0 main:app
