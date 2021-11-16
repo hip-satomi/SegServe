@@ -187,7 +187,33 @@ async def image_prediction(repo: str, entry_point: Optional[str] = 'main', versi
 
         # collect the results
         with open(output_file, 'r') as output_json:
-            return json.load(output_json)
+            result = json.load(output_json)
+            result['filename'] = file.filename
+            return result
+
+@app.post("/batch-image-prediction/")
+async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main', version: Optional[str] = 'main', files: List[UploadFile] = File(...), parameters: Optional[str] = None):
+    """Batch image segmentation for multiple image files
+
+    Args:
+        repo (str): git url to the repo containing mlflow project with segmentation
+        entry_point (Optional[str], optional): mlproject entry point. Defaults to 'main'.
+        version (Optional[str], optional): Commit hash/branch/tag of the git repo. Defaults to 'main'.
+        files (List[UploadFile], optional): List of image files. Defaults to File(...).
+        parameters (Optional[str], optional): Additional parameters to pass on to the repo segmentation approach. Defaults to None.
+
+    Returns:
+        [List]: python list of segmentation results for every image
+    """
+    results = []
+
+    # loop over files
+    for file in files:
+        # perform image prediction for every file
+        json_result = await image_prediction(repo, entry_point, version, file, parameters)
+        results.append(json_result)
+    return results
+
 
 if __name__ == '__main__':
     import uvicorn
