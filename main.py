@@ -2,6 +2,7 @@ from shutil import Error
 from typing import List, Optional
 
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.gzip import GZipMiddleware
 
 from utils import TempFolder
 import os.path as osp
@@ -11,6 +12,7 @@ import logging
 
 app = FastAPI()
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 @app.get("/")
 def read_root():
