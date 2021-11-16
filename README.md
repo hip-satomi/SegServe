@@ -33,3 +33,12 @@ connects the port `8000` of your computer to port `8000` in the container.
 
 The server comes with an api documentation that is accessible under `/docs`. It also provides an interactive user interface to test approaches.
 
+# Running behind a proxy
+
+For correctly running behind a proxy you need to a the `--root-path` command to your uvicorn launch specifying the sub-url location where your seg-serve instance is listening. For example
+
+```
+docker run ... uvicorn uvicorn --host 0.0.0.0 --root-path=/this/is/your/sub-url/ main:app
+```
+
+If you do not configure this, the endpoints will still be accessible but `docs` interactive usage will not work.
