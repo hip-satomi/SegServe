@@ -1,5 +1,5 @@
 from shutil import Error
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import FastAPI, File, UploadFile
 
