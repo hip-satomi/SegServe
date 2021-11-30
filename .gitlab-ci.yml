@@ -10,7 +10,7 @@ build-docker:
   script:
     - echo $CI_REGISTRY
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker pull $CI_REGISTRY/serve-segmentation/server:latest || 'No cached image yet'
+    - docker pull $CI_REGISTRY/serve-segmentation/server:latest || echo 'No cached image yet'
     - docker build --cache-from $CI_REGISTRY/serve-segmentation/server:latest -t $CI_REGISTRY/serve-segmentation/server:latest -t $CI_REGISTRY/serve-segmentation/server:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY/serve-segmentation/server:$CI_COMMIT_BRANCH .
     - docker push $CI_REGISTRY/serve-segmentation/server:$CI_COMMIT_SHORT_SHA
     - docker push $CI_REGISTRY/serve-segmentation/server:$CI_COMMIT_BRANCH
