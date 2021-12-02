@@ -21,7 +21,7 @@ if [[ $# -eq 0 ]] ; then
     echo 'No arguments specified. So we start the default uvicorn server...'
     uvicorn --host 0.0.0.0 main:app
 else
-    exec $@
+    exec "$@"
 fi
 
 
