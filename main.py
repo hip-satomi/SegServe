@@ -9,6 +9,7 @@ import os.path as osp
 import mlflow
 import json
 import logging
+import os
 
 app = FastAPI()
 
@@ -207,14 +208,60 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
     Returns:
         [List]: python list of segmentation results for every image
     """
-    results = []
+    # write file to temporary folder
+    with TempFolder() as tmpDir:
+
+        image_paths = []
+        output_file = osp.join(tmpDir.root, 'output.json')
+        image_folder = osp.join(tmpDir.root, 'images')
+        os.makedirs(image_folder)
+        for i,file in enumerate(files):
+            # write image file
+            input_file = osp.join(image_folder, 'i%03d.png' % i)
+
+            image_paths.append(osp.abspath(input_file))
+
+            with open(input_file, 'wb') as output:
+                output.write(file.file.read())
+
+        additional_parameters = {}
+        if parameters:
+            try:
+                additional_parameters = json.loads(parameters)
+            except:
+                logging.warning('Failed parsing additional parameters')
+
+        # execute the project
+        run = mlflow.projects.run(
+            repo,
+            entry_point=entry_point,
+            version=version,
+            backend='local',
+            storage_dir=tmpDir.root,
+            parameters={
+                'input_images': image_folder,
+                **additional_parameters
+            })
+
+        print(run.run_id)
+
+        # download the output artifact
+        client = mlflow.tracking.MlflowClient()
+        client.download_artifacts(run.run_id, 'output.json', tmpDir.root)
+
+        if not osp.isfile(output_file):
+            raise FileNotFoundError('Could not find "output.json" file. Please log this as an artifact in your code: mlflow.log_artifact(\'output.json\')')
+
+        # collect the results
+        with open(output_file, 'r') as output_json:
+            result = json.load(output_json)
+            return result
+
 
     # loop over files
-    for file in files:
-        # perform image prediction for every file
-        json_result = await image_prediction(repo, entry_point, version, file, parameters)
-        results.append(json_result)
-    return results
+    # perform image prediction for every file
+    #results = await image_prediction(repo, entry_point, version, files, parameters)
+    #return results
 
 
 if __name__ == '__main__':

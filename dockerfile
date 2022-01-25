@@ -1,5 +1,7 @@
 FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
 
+RUN apt-get update && apt-get install -y python3-opencv
+
 RUN mkdir app/
 
 RUN mkdir /home/appuser/
@@ -44,6 +46,7 @@ ENV MLFLOW_CONDA_CREATE_ENV_CMD=mamba
 
 ENTRYPOINT ["./entrypoint.sh"]
 
+EXPOSE 8000
 #CMD [ \
   #"conda activate serve" \
   #"conda", "activate", "serve", "&&" \

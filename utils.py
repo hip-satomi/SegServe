@@ -6,8 +6,8 @@ import shutil
 class TempFolder:
 
     def __enter__(self):
-        folder_name = str(uuid.uuid4())
-        self.root = osp.abspath(osp.join('tmp', folder_name))
+        folder_name = str(uuid.uuid4())[:8]  # only use the first 8 characters (otherwise paths get so long)
+        self.root = osp.abspath(osp.join('/tmp', folder_name))
         os.makedirs(self.root)
 
         sharedDataFolder = 'sharedData'
