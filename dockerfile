@@ -43,7 +43,7 @@ RUN echo "conda activate serve" >> /home/appuser/.bashrc
 COPY ./entrypoint.sh ./
 
 ENV MLFLOW_CONDA_CREATE_ENV_CMD=mamba
-ENV CACHE_FOLDER="/homer/appuser/cache"
+ENV CACHE_FOLDER="/home/appuser/cache"
 RUN mkdir -p ${CACHE_FOLDER}
 
 ENTRYPOINT ["./entrypoint.sh"]
