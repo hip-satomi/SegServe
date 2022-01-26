@@ -4,9 +4,9 @@ stages:
 
 build-docker:
   stage: build
-  image: docker:20.10.8
+  image: $CI_REGISTRY/satomi/segtrackui/docker:20.10.8
   services:
-    - docker:20.10.8-dind
+    - $CI_REGISTRY/satomi/segtrackui/docker:20.10.8-dind
   script:
     - echo $CI_REGISTRY
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
