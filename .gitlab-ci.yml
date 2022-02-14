@@ -11,8 +11,8 @@ build-docker:
   script:
     - echo $CI_REGISTRY
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker pull $CI_REGISTRY/j.seiffarth/serve-segmentation/server:$CI_COMMIT_BRANCH || echo 'No cached image yet'
-    - docker build --cache-from $CI_REGISTRY/j.seiffarth/serve-segmentation/server:$CI_COMMIT_BRANCH -t $CI_REGISTRY/j.seiffarth/serve-segmentation/server:latest -t $CI_REGISTRY/j.seiffarth/serve-segmentation/server:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY/j.seiffarth/serve-segmentation/server:$CI_COMMIT_BRANCH .
-    - docker push $CI_REGISTRY/j.seiffarth/serve-segmentation/server:$CI_COMMIT_SHORT_SHA
-    - docker push $CI_REGISTRY/j.seiffarth/serve-segmentation/server:$CI_COMMIT_BRANCH
-    - if [ "$CI_COMMIT_BRANCH" = "master" ]; then docker push $CI_REGISTRY/j.seiffarth/serve-segmentation/server:latest; fi
+    - docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH || echo 'No cached image yet'
+    - docker build --cache-from $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH .
+    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH
+    - if [ "$CI_COMMIT_BRANCH" = "master" ]; then docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest; fi
