@@ -1,6 +1,6 @@
 stages:
   - build
-
+  - test
 
 build-docker:
   stage: build
@@ -11,8 +11,37 @@ build-docker:
   script:
     - echo $CI_REGISTRY
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH || echo 'No cached image yet'
-    - docker build --cache-from $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH .
+    - export DOCKER_CACHE_IMAGE=$CI_COMMIT_BRANCH
+    - docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH || echo 'No cached image for the branch yet' && docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_DEFAULT_BRANCH && export DOCKER_CACHE_IMAGE=$CI_DEFAULT_BRANCH || echo 'Not even a default branch'
+    - echo "Caching from version $DOCKER_CACHE_IMAGE"
+    - docker build --cache-from $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$DOCKER_CACHE_IMAGE -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH .
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH
     - if [ "$CI_COMMIT_BRANCH" = "master" ]; then docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest; fi
+
+# execute the segmentation prediction with a test image
+test-online-exec:
+  variables:
+    SERVICE_LOG_NAME: "/builds/service-logs/logs-${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}.txt"
+    FF_NETWORK_PER_BUILD: "true"     # activate container-to-container networking
+  stage: test
+  image: python:3.9.10
+  tags:
+    - big-ram
+  services:
+    - name: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA
+      alias: segserve
+      entrypoint:
+      - /bin/bash
+      command:
+      - -c
+      - "echo Log dir: ${SERVICE_LOG_NAME}; ls /; ls -all /builds; mkdir -p /builds/service-logs; ls /builds; source /home/appuser/.bashrc; uvicorn --host 0.0.0.0 --port 80 main:app 2>&1 | tee ${SERVICE_LOG_NAME}"
+
+  script:
+    - echo "Log dir ${SERVICE_LOG_NAME}"
+    - |
+      (tail -f -n +1 "${SERVICE_LOG_NAME}" | awk '{print "[service-logs]: " $0}' &)
+    - pip install requests pillow
+    - python tests/test.py
+  after_script:
+    - rm ${SERVICE_LOG_NAME}
