@@ -1,8 +1,23 @@
 from shutil import Error
 from typing import List, Optional
+from furl import furl
 
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.gzip import GZipMiddleware
+from starlette_exporter import PrometheusMiddleware, handle_metrics
+from prometheus_client import start_http_server, Summary, Histogram, Counter, Info
+
+# Create a metric to track via prometheus
+
+# track cell count that comes out of segmentation
+labels = ['method_repo', 'entrypoint', 'version', 'parameters']
+prom_segmentation_cell_count = Histogram('segmentation_cells', 'Time spent processing request', labels, buckets=[10, 20, 40, 80, 120, 200, 400, 600, 800, 1200, 1600, 2000, 2500, 3000, 4000, float('inf')])
+# track the total segmentation time in seconds
+prom_segmentation_seconds = Histogram('segmentation_seconds', 'Time spent processing request', labels, buckets=(1., 3., 6., 9., 12, 16., 20., 30., 40., 50., 60., 90., 120, 150, 180, 240, 300, float('inf')))
+# track the segmentation time per image
+prom_segmentation_per_image_seconds = Histogram('segmentation_per_image_seconds', 'Time spent processing request', labels, buckets=(1., 3., 6., 9., 12, 16., 20., 30., 40., 50., 60., 90., 120, 150, 180, 240, 300, float('inf')))
+# track the number of images
+prom_segmentation_images = Counter('segmenation_images', 'Number of segmented images', labels)
 
 from utils import TempFolder
 import os.path as osp
@@ -10,10 +25,14 @@ import mlflow
 import json
 import logging
 import os
+import time
 
 app = FastAPI()
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+app.add_middleware(PrometheusMiddleware)
+app.add_route("/metrics", handle_metrics)
 
 @app.get("/")
 def read_root():
@@ -21,6 +40,12 @@ def read_root():
 
 @app.post("/image-prediction/")
 async def image_prediction(repo: str, entry_point: Optional[str] = 'main', version: Optional[str] = 'main', file: UploadFile = File(...), parameters: Optional[str] = None):
+
+    # make a password less repo url for logging
+    parsed = furl(repo)
+    parsed.password = ""
+    parsed.username = ""
+    repo_safe = parsed.url
 
     # write file to temporary folder
     with TempFolder() as tmpDir:
@@ -60,6 +85,9 @@ async def image_prediction(repo: str, entry_point: Optional[str] = 'main', versi
         if not osp.isfile(output_file):
             raise FileNotFoundError('Could not find "output.json" file. Please log this as an artifact in your code: mlflow.log_artifact(\'output.json\')')
 
+        # just a single image
+        prom_segmentation_images.labels(repo_safe, entry_point, version, parameters).inc()
+
         # collect the results
         with open(output_file, 'r') as output_json:
             result = json.load(output_json)
@@ -80,6 +108,13 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
     Returns:
         [List]: python list of segmentation results for every image
     """
+
+    # make a password less repo url for logging
+    parsed = furl(repo)
+    parsed.password = ""
+    parsed.username = ""
+    repo_safe = parsed.url
+
     # write file to temporary folder
     with TempFolder() as tmpDir:
 
@@ -104,6 +139,7 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
                 logging.warning('Failed parsing additional parameters')
 
         # execute the project
+        current_time = time.time()
         run = mlflow.projects.run(
             repo,
             entry_point=entry_point,
@@ -114,6 +150,10 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
                 'input_images': image_folder,
                 **additional_parameters
             })
+
+        # notify segmentation time
+        duration = time.time() - current_time
+        prom_segmentation_seconds.labels(repo_safe, entry_point, version, parameters).observe(duration)
 
         print(run.run_id)
 
@@ -127,8 +167,22 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
         # collect the results
         with open(output_file, 'r') as output_json:
             result = json.load(output_json)
-            return result
+            num_images = 1
+            num_objects = 0
+            if isinstance(result, list):
+                num_images = len(result)
+                # sum the detection counts for all images
+                for image_result in result:
+                    num_objects += len(image_result['segmentation'])
+            else:
+                # get the detection count for the single image
+                num_objects += len(result['segmentation'])
 
+            prom_segmentation_images.labels(repo_safe, entry_point, version, parameters).inc(amount=num_images)
+            prom_segmentation_per_image_seconds.labels(repo_safe, entry_point, version, parameters).observe(duration / num_images)
+            prom_segmentation_cell_count.labels(repo_safe, entry_point, version, parameters).observe(num_objects)
+
+            return result
 
     # loop over files
     # perform image prediction for every file
