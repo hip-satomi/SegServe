@@ -24,9 +24,6 @@ RUN conda install mamba -c conda-forge -y
 
 
 COPY ./requirements.txt ./
-COPY ./sharedData ./sharedData
-COPY ./main.py ./
-COPY ./utils.py ./
 
 RUN conda create -y -n serve python=3.8.5 mamba git -c conda-forge
 
@@ -47,6 +44,10 @@ ENV CACHE_FOLDER="/home/appuser/cache"
 RUN mkdir -p ${CACHE_FOLDER}
 
 ENTRYPOINT ["./entrypoint.sh"]
+
+COPY ./sharedData ./sharedData
+COPY ./main.py ./
+COPY ./utils.py ./
 
 EXPOSE 8000
 #CMD [ \
