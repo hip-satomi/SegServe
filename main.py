@@ -167,16 +167,11 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
         # collect the results
         with open(output_file, 'r') as output_json:
             result = json.load(output_json)
-            num_images = 1
             num_objects = 0
-            if isinstance(result, list):
-                num_images = len(result)
-                # sum the detection counts for all images
-                for image_result in result:
-                    num_objects += len(image_result['segmentation'])
-            else:
-                # get the detection count for the single image
-                num_objects += len(result['segmentation'])
+            num_images = len(result['segmentation_data'])
+            # sum the detection counts for all images
+            for image_result in result['segmentation_data']:
+                num_objects += len(image_result)
 
             prom_segmentation_images.labels(repo_safe, entry_point, version, parameters).inc(amount=num_images)
             prom_segmentation_per_image_seconds.labels(repo_safe, entry_point, version, parameters).observe(duration / num_images)
