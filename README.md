@@ -25,14 +25,6 @@ docker run -it -p 8000:8000 --gpus all segserve
 
 or use the `runtime: nvidia` option in `docker-compose` (use a recent `docker-compose` version).
 
-`Hint:` You need to expose the port for accessing it from your local computer, e.g.
-
-```
-docker run ... -p 8000:8000 ...
-```
-
-connects the port `8000` of your computer to port `8000` in the container.
-
 # Usage
 
 To use `SegServe` for segmentation you can access the REST API, for example, using `curl`. Here is a bash example that first downloads an example image and then requests the segmentation from `SegServe` using the [Omnipose] segmentation method:
