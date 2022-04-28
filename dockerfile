@@ -43,6 +43,15 @@ ENV MLFLOW_CONDA_CREATE_ENV_CMD=mamba
 ENV CACHE_FOLDER="/home/appuser/cache"
 RUN mkdir -p ${CACHE_FOLDER}
 
+# pre-install segmentation approaches (faster execution later on)
+
+## cellpose/omnipose
+RUN conda run -n serve mlflow run https://gitlab+deploy-token-1:jzCPzEwRQacvqp8z2an9@jugit.fz-juelich.de/mlflow-executors/cellpose-executor.git -e info -v main
+## mmdetection
+RUN conda run -n serve mlflow run https://gitlab+deploy-token-1:jzCPzEwRQacvqp8z2an9@jugit.fz-juelich.de/mlflow-executors/mmdetection-executor.git -e info -v main
+## yolov5
+RUN conda run -n serve mlflow run https://gitlab+deploy-token-1:jzCPzEwRQacvqp8z2an9@jugit.fz-juelich.de/mlflow-executors/yolov5-executor.git -e info -v master
+
 ENTRYPOINT ["./entrypoint.sh"]
 
 COPY ./sharedData ./sharedData
