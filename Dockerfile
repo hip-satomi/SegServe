@@ -50,7 +50,7 @@ RUN conda run -n serve mlflow run https://github.com/hip-satomi/Cellpose-Executo
 ## mmdetection
 RUN conda run -n serve mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
 ## yolov5
-RUN conda run -n serve mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v master
+RUN conda run -n serve mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
 
 ENTRYPOINT ["./entrypoint.sh"]
 
