@@ -38,6 +38,10 @@ curl -X 'POST' \
   -F 'files=@localhost.jpeg;type=image/jpeg'
 ```
 
+# Custom DLS Executor
+
+You can include costum implemented DLS methods into segServe. Read this [tutorial](CustomDLSExecutor.md) to build your own git repository capable of running DLS in segServe.
+
 # API documentation
 
 The server comes with an api documentation that is accessible at `localhost:8000/docs`. It also provides an interactive user interface to execute various segmentation approaches with different parameters and image files.
