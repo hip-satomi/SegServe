@@ -40,7 +40,7 @@ curl -X 'POST' \
 
 # Custom DLS Executor
 
-You can include costum implemented DLS methods into segServe. Read this [tutorial](CustomDLSExecutor.md) to build your own git repository capable of running DLS in segServe.
+You can include costum implemented DLS methods into segServe. Read this [tutorial](docs/CustomDLSExecutor.md) to build your own git repository capable of running DLS in segServe.
 
 # API documentation
 
