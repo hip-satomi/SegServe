@@ -46,17 +46,18 @@ RUN mkdir -p ${CACHE_FOLDER}
 # pre-install segmentation approaches (faster execution later on)
 
 ## cellpose/omnipose
-RUN conda run -n serve mlflow run https://gitlab+deploy-token-1:jzCPzEwRQacvqp8z2an9@jugit.fz-juelich.de/mlflow-executors/cellpose-executor.git -e info -v main
+RUN conda run -n serve mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
 ## mmdetection
-RUN conda run -n serve mlflow run https://gitlab+deploy-token-1:jzCPzEwRQacvqp8z2an9@jugit.fz-juelich.de/mlflow-executors/mmdetection-executor.git -e info -v main
+RUN conda run -n serve mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
 ## yolov5
-RUN conda run -n serve mlflow run https://gitlab+deploy-token-1:jzCPzEwRQacvqp8z2an9@jugit.fz-juelich.de/mlflow-executors/yolov5-executor.git -e info -v master
+RUN conda run -n serve mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
 
 ENTRYPOINT ["./entrypoint.sh"]
 
 COPY ./sharedData ./sharedData
 COPY ./main.py ./
 COPY ./utils.py ./
+COPY ./influx.py ./
 
 EXPOSE 8000
 #CMD [ \
