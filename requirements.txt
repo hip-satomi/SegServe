@@ -5,3 +5,4 @@ starlette_exporter
 prometheus-client
 mlflow
 furl
+influxdb-client

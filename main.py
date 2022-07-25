@@ -26,6 +26,8 @@ import json
 import logging
 import os
 import time
+from influx import influxdb_report_images, influxdb_report_timing
+import traceback
 
 app = FastAPI()
 
@@ -169,9 +171,21 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
             result = json.load(output_json)
             num_objects = 0
             num_images = len(result['segmentation_data'])
+
+            objects_in_images = []
+
             # sum the detection counts for all images
             for image_result in result['segmentation_data']:
                 num_objects += len(image_result)
+                objects_in_images.append(len(image_result))
+
+            # notify influxdb
+            try:
+                influxdb_report_images(objects_in_images, repo=repo, entry_point=entry_point, version=version)
+                influxdb_report_timing(duration, num_objects, num_images, repo=repo, entry_point=entry_point, version=version)
+            except Exception:
+                logging.error("Error while reporting influx data")
+                logging.error(traceback.format_exc())
 
             prom_segmentation_images.labels(repo_safe, entry_point, version, parameters).inc(amount=num_images)
             prom_segmentation_per_image_seconds.labels(repo_safe, entry_point, version, parameters).observe(duration / num_images)
