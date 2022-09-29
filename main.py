@@ -97,7 +97,7 @@ async def image_prediction(repo: str, entry_point: Optional[str] = 'main', versi
             return result
 
 @app.post("/batch-image-prediction/")
-async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main', version: Optional[str] = 'main', files: List[UploadFile] = File(...), parameters: Optional[str] = None):
+async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main', version: Optional[str] = 'main', files: List[UploadFile] = File(...), parameters: Optional[str] = None, username: Optional[str] = None):
     """Batch image segmentation for multiple image files
 
     Args:
@@ -106,6 +106,7 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
         version (Optional[str], optional): Commit hash/branch/tag of the git repo. Defaults to 'main'.
         files (List[UploadFile], optional): List of image files. Defaults to File(...).
         parameters (Optional[str], optional): Additional parameters to pass on to the repo segmentation approach. Defaults to None.
+        username (Optional[str], optional): Information about the requesting user (for metrics only)
 
     Returns:
         [List]: python list of segmentation results for every image
@@ -181,8 +182,8 @@ async def batch_image_prediction(repo: str, entry_point: Optional[str] = 'main',
 
             # notify influxdb
             try:
-                influxdb_report_images(objects_in_images, repo=repo, entry_point=entry_point, version=version)
-                influxdb_report_timing(duration, num_objects, num_images, repo=repo, entry_point=entry_point, version=version)
+                influxdb_report_images(objects_in_images, repo=repo, entry_point=entry_point, version=version, username=username)
+                influxdb_report_timing(duration, num_objects, num_images, repo=repo, entry_point=entry_point, version=version, username=username)
             except Exception:
                 logging.error("Error while reporting influx data")
                 logging.error(traceback.format_exc())
