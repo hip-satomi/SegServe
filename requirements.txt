@@ -3,6 +3,6 @@ uvicorn[standard]
 python-multipart
 starlette_exporter
 prometheus-client
-mlflow
+mlflow==1.30.0
 furl
 influxdb-client
