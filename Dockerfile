@@ -25,7 +25,7 @@ RUN conda install mamba -c conda-forge -y
 
 COPY ./requirements.txt ./
 
-RUN conda create -y -n serve python=3.8.5 mamba git -c conda-forge
+RUN mamba create -y -n serve python=3.8.5 mamba git -c conda-forge
 
 RUN conda run -n serve \
   python -m pip install -r requirements.txt
@@ -46,7 +46,7 @@ RUN mkdir -p ${CACHE_FOLDER}
 # pre-install segmentation approaches (faster execution later on)
 
 ## cellpose/omnipose
-RUN conda run -n serve mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
+RUN mamba run -n serve mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
 ## mmdetection
 RUN conda run -n serve mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
 ## yolov5
