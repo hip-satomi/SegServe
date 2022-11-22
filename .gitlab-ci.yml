@@ -33,7 +33,7 @@ build-docker:
     - echo $CI_REGISTRY
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - export DOCKER_CACHE_IMAGE=$CI_COMMIT_BRANCH
-    - docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH || echo 'No cached image for the branch yet' && docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_DEFAULT_BRANCH && export DOCKER_CACHE_IMAGE=$CI_DEFAULT_BRANCH || echo 'Not even a default branch'
+    #- docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH || echo 'No cached image for the branch yet' && docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_DEFAULT_BRANCH && export DOCKER_CACHE_IMAGE=$CI_DEFAULT_BRANCH || echo 'Not even a default branch'
     - echo "Caching from version $DOCKER_CACHE_IMAGE"
     - docker build --cache-from $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$DOCKER_CACHE_IMAGE -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH .
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA
@@ -52,11 +52,7 @@ test-online-exec:
   services:
     - name: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA
       alias: segserve
-      entrypoint:
-      - /bin/bash
-      command:
-      - -c
-      - "echo Log dir: ${SERVICE_LOG_NAME}; ls /; ls -all /builds; mkdir -p /builds/service-logs; ls /builds; source /home/appuser/.bashrc; uvicorn --host 0.0.0.0 --port 80 main:app 2>&1 | tee ${SERVICE_LOG_NAME}"
+      command: ["/bin/bash", "-c", "echo Log dir: ${SERVICE_LOG_NAME}; ls /; ls -all /builds; mkdir -p /builds/service-logs; ls /builds; uvicorn --host 0.0.0.0 --port 80 main:app 2>&1 | tee ${SERVICE_LOG_NAME}"]
 
   script:
     - echo "Log dir ${SERVICE_LOG_NAME}"

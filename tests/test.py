@@ -58,7 +58,7 @@ class TestSegmentation(unittest.TestCase):
 
         # send a request to the server
         response = requests.post(
-            f'http://segserve/{service_url}/', params=params, files=multipart_form_data, timeout=600
+            f'http://segserve/{service_url}/', params=params, files=multipart_form_data, timeout=60*60
         )
 
         # output response
