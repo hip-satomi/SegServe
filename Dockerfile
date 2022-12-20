@@ -19,7 +19,7 @@ RUN python --version
 
 COPY ./entrypoint.sh ./
 
-ENV MLFLOW_CONDA_CREATE_ENV_CMD=mamba
+ENV MLFLOW_CONDA_CREATE_ENV_CMD=/opt/conda/bin/mamba
 ENV CACHE_FOLDER="/home/$MAMBA_USER/cache"
 RUN mkdir -p ${CACHE_FOLDER}
 
