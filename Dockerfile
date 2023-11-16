@@ -57,6 +57,7 @@ ENTRYPOINT ["./entrypoint.sh"]
 COPY ./sharedData ./sharedData
 COPY ./main.py ./
 COPY ./utils.py ./
+COPY ./influx.py ./
 
 EXPOSE 8000
 #CMD [ \
