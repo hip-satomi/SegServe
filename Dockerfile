@@ -1,65 +1,45 @@
-FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
+FROM mambaorg/micromamba:1.1-focal-cuda-11.6.2
 
-RUN apt-get update && apt-get install -y python3-opencv
+ARG NEW_MAMBA_USER=mambauser
+ARG NEW_MAMBA_USER_ID=1000
+ARG NEW_MAMBA_USER_GID=1000
 
-RUN mkdir app/
+#RUN apt-get update && apt-get install -y python3-opencv
+ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
-RUN mkdir /home/appuser/
-
-RUN groupadd -g 999 appuser && \
-    useradd -r -u 999 -g appuser appuser
-
-RUN chown -R appuser:appuser app/
-RUN chown -R appuser:appuser /home/appuser/
-
-RUN chown -R appuser:appuser /opt/conda
-
-WORKDIR /home/appuser/
-
-USER appuser
-
-
-
-RUN conda install mamba -c conda-forge -y
-
+WORKDIR /home/$MAMBA_USER
 
 COPY ./requirements.txt ./
 
-RUN conda create -y -n serve python=3.8.5 mamba git -c conda-forge
+RUN micromamba install -y python=3.8 mamba git -c conda-forge
 
-RUN conda run -n serve \
-  python -m pip install -r requirements.txt
+RUN python -m pip install -r requirements.txt
 
-RUN conda run -n serve python --version
-
-# Make RUN commands use the new environment:
-SHELL ["/bin/bash", "--login", "-c"]
-RUN conda init bash
-RUN echo "conda activate serve" >> /home/appuser/.bashrc
+RUN python --version
 
 COPY ./entrypoint.sh ./
 
-ENV MLFLOW_CONDA_CREATE_ENV_CMD=mamba
-ENV CACHE_FOLDER="/home/appuser/cache"
+ENV MLFLOW_CONDA_CREATE_ENV_CMD=/opt/conda/bin/mamba
+ENV CACHE_FOLDER="/home/$MAMBA_USER/cache"
 RUN mkdir -p ${CACHE_FOLDER}
 
 # pre-install segmentation approaches (faster execution later on)
 
 ## cellpose/omnipose
-RUN conda run -n serve mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
+RUN mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
 ## mmdetection
-RUN conda run -n serve mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
+RUN mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
 ## yolov5
-RUN conda run -n serve mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
+RUN mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
 
-ENTRYPOINT ["./entrypoint.sh"]
-
-COPY ./sharedData ./sharedData
+# copy scripts
 COPY ./main.py ./
 COPY ./utils.py ./
 COPY ./influx.py ./
 
 EXPOSE 8000
+
+CMD ["uvicorn", "--host", "0.0.0.0", "main:app"]
 #CMD [ \
   #"conda activate serve" \
   #"conda", "activate", "serve", "&&" \
