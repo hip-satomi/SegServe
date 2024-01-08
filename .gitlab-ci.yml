@@ -58,7 +58,10 @@ test-online-exec:
     - echo "Log dir ${SERVICE_LOG_NAME}"
     - |
       (tail -f -n +1 "${SERVICE_LOG_NAME}" | awk '{print "[service-logs]: " $0}' &)
-    - pip install requests pillow
-    - python tests/test.py
+    - pip install requests pillow pytest pytest-xdist
+    - python -m pytest --junitxml=report.xml tests/test.py
+  artifacts:
+    reports:
+      junit: report.xml
   after_script:
     - rm ${SERVICE_LOG_NAME}
