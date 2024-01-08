@@ -1,4 +1,4 @@
-FROM mambaorg/micromamba:1.1-focal-cuda-11.6.2
+FROM mambaorg/micromamba:1.5.5-focal-cuda-11.6.2
 
 ARG NEW_MAMBA_USER=mambauser
 ARG NEW_MAMBA_USER_ID=1000
