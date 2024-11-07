@@ -34,7 +34,7 @@ RUN ln -s /opt/conda/bin/mamba /opt/conda/bin/conda
 ## yolov5
 #RUN mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
 ## Omnipose
-RUN mlflow run https://gitlab+deploy-token-281:TZYmjRQZzLZsBfWsd2XS@jugit.fz-juelich.de/mlflow-executors/omnipose-executor -e info -v main
+RUN mlflow run https://gitlab+deploy-token-281:TZYmjRQZzLZsBfWsd2XS@jugit.fz-juelich.de/mlflow-executors/omnipose-executor:fix-pipeline -e info -v main
 
 # copy scripts
 COPY ./main.py ./
