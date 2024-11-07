@@ -36,6 +36,7 @@ build-docker:
     #- docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH || echo 'No cached image for the branch yet' && docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_DEFAULT_BRANCH && export DOCKER_CACHE_IMAGE=$CI_DEFAULT_BRANCH || echo 'Not even a default branch'
     - echo "Caching from version $DOCKER_CACHE_IMAGE"
     - docker build --cache-from $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$DOCKER_CACHE_IMAGE -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH .
+    - if [ $CI_REGULAR_EXEC == "1"]; then exit(0); fi
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH
     - if [ "$CI_COMMIT_BRANCH" = "master" ]; then docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest; fi
