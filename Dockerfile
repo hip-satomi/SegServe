@@ -20,11 +20,13 @@ RUN python --version
 COPY ./entrypoint.sh ./
 
 ENV MLFLOW_CONDA_CREATE_ENV_CMD=/opt/conda/bin/mamba
-ENV MLFLOW_CONDA_HOME=/opt/conda/bin/mamba
+ENV MLFLOW_CONDA_HOME=/opt/conda/
 ENV CACHE_FOLDER="/home/$MAMBA_USER/cache"
 RUN mkdir -p ${CACHE_FOLDER}
 
 # pre-install segmentation approaches (faster execution later on)
+
+RUN ln -s /opt/conda/bin/mamba /opt/conda/bin/conda
 
 ## cellpose/omnipose
 RUN mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
