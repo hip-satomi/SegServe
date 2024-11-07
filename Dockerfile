@@ -28,11 +28,11 @@ RUN mkdir -p ${CACHE_FOLDER}
 RUN ln -s /opt/conda/bin/mamba /opt/conda/bin/conda
 
 ## cellpose/omnipose
-RUN mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
+#RUN mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
 ## mmdetection
-RUN mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
+#RUN mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
 ## yolov5
-RUN mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
+#RUN mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
 ## Omnipose
 RUN mlflow run https://gitlab+deploy-token-281:TZYmjRQZzLZsBfWsd2XS@jugit.fz-juelich.de/mlflow-executors/omnipose-executor -e info -v main
 
