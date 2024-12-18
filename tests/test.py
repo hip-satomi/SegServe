@@ -35,7 +35,7 @@ class TestSegmentation(unittest.TestCase):
         service_url = 'batch-image-prediction'
         method_repo = f'https://gitlab-ci-token:{CI_JOB_TOKEN}@jugit.fz-juelich.de/mlflow-executors/omnipose-executor.git'
 
-        self.predict(service_url, method_repo, 'main', 'fix-pipeline')
+        self.predict(service_url, method_repo, 'main', 'main')
 
     def test_custom_omnipose(self):
         CI_JOB_TOKEN = os.environ['CI_JOB_TOKEN']
@@ -44,7 +44,7 @@ class TestSegmentation(unittest.TestCase):
         service_url = 'batch-image-prediction'
         method_repo = f'https://gitlab-ci-token:{CI_JOB_TOKEN}@jugit.fz-juelich.de/mlflow-executors/omnipose-executor.git'
 
-        self.predict(service_url, method_repo, 'main', 'fix-pipeline', additional_parameters = {"model": "https://fz-juelich.sciebo.de/s/SJHXyT7xQfITHgw/download"})
+        self.predict(service_url, method_repo, 'main', 'main', additional_parameters = {"model": "https://fz-juelich.sciebo.de/s/SJHXyT7xQfITHgw/download"})
 
     def predict(self, service_url, method_repo, entrypoint, version, additional_parameters={}):
         import requests

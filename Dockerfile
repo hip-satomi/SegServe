@@ -36,7 +36,7 @@ RUN mkdir -p ${CACHE_FOLDER}
 ## Omnipose
 
 
-RUN mlflow run https://gitlab+deploy-token-281:TZYmjRQZzLZsBfWsd2XS@jugit.fz-juelich.de/mlflow-executors/omnipose-executor.git -e info -v fix-pipeline
+RUN mlflow run https://gitlab+deploy-token-281:TZYmjRQZzLZsBfWsd2XS@jugit.fz-juelich.de/mlflow-executors/omnipose-executor.git -e info -v main
 
 # copy scripts
 COPY ./main.py ./
