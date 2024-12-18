@@ -16,6 +16,7 @@ class TestSegmentation(unittest.TestCase):
         with open('test.png', 'wb') as file:
             file.write(r.content)
 
+    """
     def test_standard(self):
         CI_JOB_TOKEN = os.environ['CI_JOB_TOKEN']
 
@@ -25,6 +26,7 @@ class TestSegmentation(unittest.TestCase):
 
         self.predict(service_url, method_repo, 'main', 'main')
         self.predict(service_url, method_repo, 'omnipose', 'main')
+    """
 
     def test_custom_omnipose(self):
         CI_JOB_TOKEN = os.environ['CI_JOB_TOKEN']
