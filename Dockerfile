@@ -1,4 +1,4 @@
-FROM mambaorg/micromamba:1.1-focal-cuda-11.6.2
+FROM mambaorg/micromamba:1.5.5-focal-cuda-11.6.2
 
 ARG NEW_MAMBA_USER=mambauser
 ARG NEW_MAMBA_USER_ID=1000
@@ -9,28 +9,34 @@ ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
 WORKDIR /home/$MAMBA_USER
 
+RUN micromamba install -y python=3.8 mamba conda git -c conda-forge
+
 COPY ./requirements.txt ./
-
-RUN micromamba install -y python=3.8 mamba git -c conda-forge
-
 RUN python -m pip install -r requirements.txt
 
 RUN python --version
 
 COPY ./entrypoint.sh ./
 
-ENV MLFLOW_CONDA_CREATE_ENV_CMD=/opt/conda/bin/mamba
+ENV MLFLOW_CONDA_CREATE_ENV_CMD=mamba 
+ENV MLFLOW_CONDA_HOME=/opt/conda/
 ENV CACHE_FOLDER="/home/$MAMBA_USER/cache"
 RUN mkdir -p ${CACHE_FOLDER}
 
 # pre-install segmentation approaches (faster execution later on)
 
+#RUN ln -s /opt/conda/bin/mamba /opt/conda/bin/conda
+
 ## cellpose/omnipose
-RUN mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
+#RUN mlflow run https://github.com/hip-satomi/Cellpose-Executor.git -e info -v main
 ## mmdetection
-RUN mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
+#RUN mlflow run https://github.com/hip-satomi/MMDetection-Executor.git -e info -v main
 ## yolov5
-RUN mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
+#RUN mlflow run https://github.com/hip-satomi/Yolov5-Executor.git -e info -v main
+## Omnipose
+
+
+RUN mlflow run https://gitlab+deploy-token-281:TZYmjRQZzLZsBfWsd2XS@jugit.fz-juelich.de/mlflow-executors/omnipose-executor.git -e info -v main
 
 # copy scripts
 COPY ./main.py ./

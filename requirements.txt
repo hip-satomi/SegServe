@@ -3,6 +3,7 @@ uvicorn[standard]
 python-multipart
 starlette_exporter
 prometheus-client
-git+https://github.com/JojoDevel/mlflow.git
+#git+https://github.com/JojoDevel/mlflow.git
+mlflow
 furl
 influxdb-client

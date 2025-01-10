@@ -36,6 +36,7 @@ build-docker:
     #- docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH || echo 'No cached image for the branch yet' && docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_DEFAULT_BRANCH && export DOCKER_CACHE_IMAGE=$CI_DEFAULT_BRANCH || echo 'Not even a default branch'
     - echo "Caching from version $DOCKER_CACHE_IMAGE"
     - docker build --cache-from $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$DOCKER_CACHE_IMAGE -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH .
+    - if [ ! -z $CI_REGULAR_EXEC ]; then exit 1; fi
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_SHORT_SHA
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:$CI_COMMIT_BRANCH
     - if [ "$CI_COMMIT_BRANCH" = "master" ]; then docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/server:latest; fi
@@ -58,7 +59,10 @@ test-online-exec:
     - echo "Log dir ${SERVICE_LOG_NAME}"
     - |
       (tail -f -n +1 "${SERVICE_LOG_NAME}" | awk '{print "[service-logs]: " $0}' &)
-    - pip install requests pillow
-    - python tests/test.py
+    - pip install requests pillow pytest pytest-xdist
+    - python -m pytest --junitxml=report.xml tests/test.py
+  artifacts:
+    reports:
+      junit: report.xml
   after_script:
     - rm ${SERVICE_LOG_NAME}
